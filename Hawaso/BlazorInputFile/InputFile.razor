@@ -1,0 +1,83 @@
+﻿@namespace BlazorInputFile
+@using System.IO
+
+@implements IDisposable
+@inject IJSRuntime JSRuntime
+
+<style>
+    .custom-file-label::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 3;
+        display: block;
+        height: calc(1.5em + 0.75rem);
+        padding: 0.375rem 0.75rem;
+        line-height: 1.5;
+        color: #5c6873;
+        content: "Browse";
+        background-color: #f0f3f5;
+        border-left: inherit;
+        border-radius: 0;
+    }
+</style>
+
+<div class="input-group mb-3" style="border-radius: 0;">
+    <div class="input-group-prepend">
+        @*<span class="input-group-text">Upload</span>*@
+    </div>
+    <div class="custom-file" style="border-radius: 0;">
+        <input type="file" class="custom-file-input" @ref="inputFileElement" @attributes="UnmatchedParameters" style="border-radius: 0;" />
+        <label class="custom-file-label" for="inputGroupFile01" style="border-radius: 0;">@FileName</label>
+    </div>
+</div>
+
+
+@code {
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object> UnmatchedParameters { get; set; }
+    [Parameter] public EventCallback<IFileListEntry[]> OnChange { get; set; }
+    [Parameter] public int MaxMessageSize { get; set; } = 20 * 1024; // TODO: Use SignalR default
+    [Parameter] public int MaxBufferSize { get; set; } = 1024 * 1024;
+
+    ElementReference inputFileElement;
+    IDisposable thisReference;
+
+    [Parameter]
+    public string FileName { get; set; } = "Choose file";
+
+    [JSInvokable]
+    public Task NotifyChange(FileListEntryImpl[] files)
+    {
+        foreach (var file in files)
+        {
+            // So that method invocations on the file can be dispatched back here
+            file.Owner = (InputFile)(object)this;
+
+            FileName = file.Name;
+        }
+
+        return OnChange.InvokeAsync(files);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            thisReference = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeAsync<object>("BlazorInputFile.init", inputFileElement, thisReference);
+        }
+    }
+
+    internal Stream OpenFileStream(FileListEntryImpl file)
+    {
+        return SharedMemoryFileListEntryStream.IsSupported(JSRuntime)
+            ? (Stream)new SharedMemoryFileListEntryStream(JSRuntime, inputFileElement, file)
+            : new RemoteFileListEntryStream(JSRuntime, inputFileElement, file, MaxMessageSize, MaxBufferSize);
+    }
+
+    void IDisposable.Dispose()
+    {
+        thisReference?.Dispose();
+    }
+}

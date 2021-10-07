@@ -1,6 +1,6 @@
 ﻿--[0] Table: Inquires(완성형 게시판) 테이블 설계 
---[!] 게시판 테이블 설계: Articles, Posts, Entries, Notes, Inquires, (Basic+Upload+Reply) => DotNetNote/DotNetMemo
-CREATE TABLE [dbo].[Inquires]
+--[!] 게시판 테이블 설계: Articles, Posts, Entries, Notes, Inquiries, (Basic+Upload+Reply) => DotNetNote/DotNetMemo
+CREATE TABLE [dbo].[Inquiries]
 (
 	[Id]            BIGINT NOT NULL PRIMARY KEY Identity(1, 1), -- [1][일련번호], Serial Number
 	[ParentId]      Int Null,								    -- ParentId, AppId, SiteId, ...

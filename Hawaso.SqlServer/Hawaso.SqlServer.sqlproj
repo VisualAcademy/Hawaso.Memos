@@ -57,8 +57,10 @@
   <ItemGroup>
     <Folder Include="Properties" />
     <Folder Include="Memos" />
+    <Folder Include="Inquiries" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Memos\Memos.sql" />
+    <Build Include="Inquiries\Inquiries.sql" />
   </ItemGroup>
 </Project>

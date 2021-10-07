@@ -27,6 +27,11 @@ builder.Services.AddSingleton<WeatherForecastService>();
 /// </summary>
 builder.Services.AddDependencyInjectionContainerForMemoApp(connectionString);
 
+/// <summary>
+/// 조사앱(InquiryApp) 관련 의존성(종속성) 주입 관련 코드만 따로 모아서 관리: 게시판 및 CRUD 관련 교과서 코드 
+/// </summary>
+builder.Services.AddDependencyInjectionContainerForInquiryApp(connectionString);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
